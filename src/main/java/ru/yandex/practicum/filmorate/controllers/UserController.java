@@ -7,17 +7,18 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private HashMap<Integer, User> users = new HashMap<>();
-    private static int id;
+    private Map<Long, User> users = new HashMap<>();
+    private static Long id = 0l;
 
     @PostMapping
     public User addUser(@RequestBody User user) throws ValidationException {
-        log.debug("Получен запрос POST /users");
+        log.info("Получен запрос POST /users");
         if (validateUser(user)) {
             user.setId(++id);
             if (user.getName().isBlank()) {
@@ -34,7 +35,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) throws ValidationException {
-        log.debug("Получен запрос PUT /users");
+        log.info("Получен запрос PUT /users");
         if (validateUser(user) && users.containsKey(user.getId())) {
             if (user.getName().isBlank()) {
                 user.setName(user.getLogin());
@@ -50,7 +51,7 @@ public class UserController {
 
     @GetMapping
     public Collection<User> getUsers() {
-        log.debug("Получен запрос GET /users");
+        log.info("Получен запрос GET /users");
         return users.values();
     }
 
