@@ -52,7 +52,7 @@ public class UserService {
         return userStorage.getUsers();
     }
 
-    protected boolean validateUser(User user) {
+    private boolean validateUser(User user) {
         if (!user.getEmail().isBlank()
                 && user.getEmail().contains("@")
                 && !user.getLogin().isBlank()

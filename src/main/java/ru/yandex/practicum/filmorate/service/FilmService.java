@@ -55,7 +55,7 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    protected boolean validateFilm(Film film) {
+    private boolean validateFilm(Film film) {
         if (!film.getName().isBlank()
                 && film.getDescription().length() <= 200
                 && film.getReleaseDate().isAfter(RELEASE_MINIMUM.minusDays(1))
