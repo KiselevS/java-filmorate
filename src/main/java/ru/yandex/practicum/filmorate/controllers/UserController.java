@@ -1,69 +1,70 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private Map<Long, User> users = new HashMap<>();
-    private static Long id = 0l;
+    private final UserService userService;
 
-    @PostMapping
-    public User addUser(@RequestBody User user) throws ValidationException {
-        log.info("Получен запрос POST /users");
-        if (validateUser(user)) {
-            user.setId(++id);
-            if (user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            users.put(id, user);
-            log.debug("Пользователь с id = {} добавлен", id);
-            return user;
-        } else {
-            log.error("Валидация не пройдена");
-            throw new ValidationException();
-        }
-    }
-
-    @PutMapping
-    public User updateUser(@RequestBody User user) throws ValidationException {
-        log.info("Получен запрос PUT /users");
-        if (validateUser(user) && users.containsKey(user.getId())) {
-            if (user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            users.put(user.getId(), user);
-            log.debug("Пользователь с id = {} обновлен", user.getId());
-            return user;
-        } else {
-            log.error("Валидация не пройдена");
-            throw new ValidationException();
-        }
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
     public Collection<User> getUsers() {
         log.info("Получен запрос GET /users");
-        return users.values();
+        return userService.getUsers();
     }
 
-    protected boolean validateUser(User user) {
-        if (!user.getEmail().isBlank()
-                && user.getEmail().contains("@")
-                && !user.getLogin().isBlank()
-                && !user.getLogin().contains(" ")
-                && user.getBirthday().isBefore(LocalDate.now().plusDays(1))) {
-            return true;
-        } else {
-            return false;
-        }
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        log.info("Получен запрос GET /users/{}", id);
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Set<User> getFriends(@PathVariable Long id) {
+        log.info("Получен запрос GET /users/{}/friends", id);
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Set<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        log.info("Получен запрос GET /users/{}/friends/common/{}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @PostMapping
+    public User addUser(@RequestBody User user) {
+        log.info("Получен запрос POST /users");
+        return userService.addUser(user);
+    }
+
+    @PutMapping
+    public User updateUser(@RequestBody User user) {
+        log.info("Получен запрос PUT /users");
+        return userService.updateUser(user);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("Получен запрос PUT /users/{}/friends/{}", id, friendId);
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("Получен запрос DELETE /users/{}/friends/{}", id, friendId);
+        userService.removeFriend(id, friendId);
     }
 }
