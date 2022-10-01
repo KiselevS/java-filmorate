@@ -1,125 +1,84 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-@Slf4j
 @Service
 public class UserService {
+
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
-    public User addUser(User user) {
-        if (validateUser(user)) {
-            log.debug("Пользователь с id = {} добавлен", user.getId());
-            return userStorage.addUser(user);
-        } else {
-            log.error("Валидация не пройдена");
-            throw new ValidationException();
-        }
-    }
 
-    public User updateUser(User user) {
-        if (userStorage.getUserById(user.getId()) != null) {
-            if (validateUser(user)) {
-                log.debug("Пользователь с id = {} обновлен", user.getId());
-                return userStorage.updateUser(user);
-            } else {
-                log.error("Валидация не пройдена");
-                throw new ValidationException();
-            }
-        } else {
-            throw new NotFoundException();
-        }
-
-    }
-
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         return userStorage.getUsers();
     }
 
-    private boolean validateUser(User user) {
-        if (!user.getEmail().isBlank()
-                && user.getEmail().contains("@")
-                && !user.getLogin().isBlank()
-                && !user.getLogin().contains(" ")
-                && user.getBirthday().isBefore(LocalDate.now().plusDays(1))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
-    public User getUserById(Long id) {
-        final User user = userStorage.getUserById(id);
-        if (user != null) {
-            return user;
-        } else {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-    }
-
-    public void addFriend(Long id, Long friendId) {
-        User user = userStorage.getUserById(id);
-        User friend = userStorage.getUserById(friendId);
-        if (user != null && friend != null) {
-            userStorage.addFriend(id, friendId);
-        } else {
+    public Optional<User> getUserById(long userId) {
+        final Optional<User> user = userStorage.getUserById(userId);
+        if (user.isEmpty()) {
             throw new NotFoundException();
         }
+        return user;
     }
 
-    public void removeFriend(Long id, Long friendId) {
-        User user = userStorage.getUserById(id);
-        User friend = userStorage.getUserById(friendId);
-        if (user != null && friend != null) {
-            userStorage.removeFriend(id, friendId);
-        } else {
+
+    public User addUser(User user) {
+        if (user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
+        return userStorage.addUser(user);
+    }
+
+
+    public User updateUser(User user) {
+        if (userStorage.getUserById(user.getId()).isEmpty()) {
             throw new NotFoundException();
         }
+        return userStorage.updateUser(user);
     }
 
-    public Set<User> getFriends(Long id) {
-        Set<User> friends = new HashSet<>();
-        final User user = userStorage.getUserById(id);
-        if (user != null) {
-            for (Long friendId : user.getFriends()){
-                friends.add(userStorage.getUserById(friendId));
-            }
-            return friends;
-        } else {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-    }
 
-    public Set<User> getCommonFriends(Long id, Long otherId) {
-        Set<User> commonFriends = new HashSet<>();
-        final User user = userStorage.getUserById(id);
-        final User otherUser = userStorage.getUserById(otherId);
-
-        if (user != null && otherUser != null) {
-            for (Long friendId : user.getFriends()) {
-                if (otherUser.getFriends().contains(friendId)) {
-                    commonFriends.add(userStorage.getUserById(friendId));
-                }
-            }
-            return commonFriends;
-        } else {
+    public void addFriend(long userId, long friendId) {
+        if (userId < 1 || friendId < 1) {
             throw new NotFoundException();
         }
+        userStorage.addFriend(userId, friendId);
+    }
+
+
+    public void removeFriend(long userId, long friendId) {
+        Optional<User> user = getUserById(userId);
+        Optional<User> friend = getUserById(friendId);
+        if (user.isPresent() & friend.isPresent()) {
+            userStorage.removeFriend(userId, friendId);
+        }
+    }
+
+
+    public Collection<User> getUserFriends(long userId) {
+        if (userId < 1) {
+            throw new NotFoundException();
+        }
+        return userStorage.getUserFriends(userId);
+    }
+
+
+    public List<User> getCommonFriends(long userId, long otherUserId) {
+        if (userStorage.getUserById(userId).isEmpty() || userStorage.getUserById(otherUserId).isEmpty()) {
+            throw new NotFoundException();
+        }
+        return userStorage.getCommonFriends(userId, otherUserId);
     }
 }
