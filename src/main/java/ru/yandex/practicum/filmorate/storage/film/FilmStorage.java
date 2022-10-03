@@ -15,8 +15,4 @@ public interface FilmStorage {
     List<Film> getPopularFilms(int count);
 
     Optional<Film> getFilmById(long filmId);
-
-    void setFilmGenre(Film film);
-
-    void loadFilmGenre(Film film);
 }
