@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -52,9 +53,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        if (getFilmById(film.getId()).isEmpty()){
-            throw new NotFoundException();
-        }
         String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION  = ?, RELEASE_DATE = ?, DURATION = ?, MPA_RATING = ? " +
                 "WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery,

@@ -54,6 +54,9 @@ public class FilmService {
         if (film.getId() < 1) {
             throw new NotFoundException();
         }
+        if (getFilmById(film.getId()).isEmpty()){
+            throw new NotFoundException();
+        }
         return filmStorage.updateFilm(film);
     }
 
