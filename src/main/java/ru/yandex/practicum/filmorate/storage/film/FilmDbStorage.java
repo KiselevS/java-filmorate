@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,8 +19,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private static JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage) {
-        this.jdbcTemplate = jdbcTemplate;
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+        FilmDbStorage.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
