@@ -35,6 +35,9 @@ public class FilmService {
         if(filmStorage.getFilmById(filmId).isEmpty()){
             throw new NotFoundException();
         }
+        if (filmStorage.getFilmById(filmId).isEmpty()){
+            throw new NotFoundException();
+        }
         return filmStorage.getFilmById(filmId);
     }
 
@@ -54,6 +57,9 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         if(filmStorage.getFilmById(film.getId()).isEmpty()){
+            throw new NotFoundException();
+        }
+        if (getFilmById(film.getId()).isEmpty()){
             throw new NotFoundException();
         }
         return filmStorage.updateFilm(film);
