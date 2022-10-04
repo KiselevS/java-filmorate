@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class FilmService {
 
@@ -30,7 +32,7 @@ public class FilmService {
     }
 
     public Optional<Film> getFilmById(long filmId) {
-        if (filmId < 1) {
+        if(filmStorage.getFilmById(filmId).isEmpty()){
             throw new NotFoundException();
         }
         return filmStorage.getFilmById(filmId);
@@ -51,7 +53,7 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        if (film.getId() < 1) {
+        if(filmStorage.getFilmById(film.getId()).isEmpty()){
             throw new NotFoundException();
         }
         return filmStorage.updateFilm(film);
