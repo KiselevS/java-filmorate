@@ -5,10 +5,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,8 +20,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private static JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage) {
-        this.jdbcTemplate = jdbcTemplate;
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+        FilmDbStorage.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -52,6 +52,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
+        if (getFilmById(film.getId()).isEmpty()){
+            throw new NotFoundException();
+        }
         String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION  = ?, RELEASE_DATE = ?, DURATION = ?, MPA_RATING = ? " +
                 "WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery,
