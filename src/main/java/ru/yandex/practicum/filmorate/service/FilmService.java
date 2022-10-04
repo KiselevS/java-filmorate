@@ -33,6 +33,9 @@ public class FilmService {
         if (filmId < 1) {
             throw new NotFoundException();
         }
+        if (filmStorage.getFilmById(filmId).isEmpty()){
+            throw new NotFoundException();
+        }
         return filmStorage.getFilmById(filmId);
     }
 
