@@ -6,13 +6,16 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import javax.validation.Valid;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
 
-@Slf4j
 @RestController
-@RequestMapping("/users")
+@Slf4j
+@RequestMapping(value = "/users")
 public class UserController {
+
     private final UserService userService;
 
     @Autowired
@@ -21,49 +24,49 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         log.info("Получен запрос GET /users");
         return userService.getUsers();
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
+    public Optional<User> getUserById(@PathVariable long id) {
         log.info("Получен запрос GET /users/{}", id);
         return userService.getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
-    public Set<User> getFriends(@PathVariable Long id) {
+    public Collection<User> getUserFriends(@PathVariable long id) {
         log.info("Получен запрос GET /users/{}/friends", id);
-        return userService.getFriends(id);
+        return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+    public List<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
         log.info("Получен запрос GET /users/{}/friends/common/{}", id, otherId);
         return userService.getCommonFriends(id, otherId);
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
+    public User addUser(@Valid @RequestBody User user) {
         log.info("Получен запрос POST /users");
         return userService.addUser(user);
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         log.info("Получен запрос PUT /users");
         return userService.updateUser(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
         log.info("Получен запрос PUT /users/{}/friends/{}", id, friendId);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public void removeFriend(@PathVariable long id, @PathVariable long friendId) {
         log.info("Получен запрос DELETE /users/{}/friends/{}", id, friendId);
         userService.removeFriend(id, friendId);
     }
